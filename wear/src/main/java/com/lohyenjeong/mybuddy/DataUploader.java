@@ -22,27 +22,27 @@ import java.util.concurrent.TimeUnit;
  * This class is responsible for Google Play Service integration
  * and sending data items to the Android Wear Network
  */
-public class MobileClient {
-    public static final String TAG = "MyBuddy/MobileClient";
+public class DataUploader {
+    public static final String TAG = "MyBuddy/DataUploader";
     private static final int CONNECTION_TIMEOUT = 15000;
 
-    public static MobileClient mobileClient;
+    public static DataUploader dataUploader;
 
     private Context context;
     private GoogleApiClient googleApiClient;
     private ExecutorService executorService;
 
-    //Method calling constructor for MobileClient
-    //Checks whether mobileClient already exists
-    public static MobileClient getMobileClient(Context context) {
-        if (mobileClient == null) {
-            mobileClient = new MobileClient(context.getApplicationContext());
+    //Method calling constructor for DataUploader
+    //Checks whether dataUploader already exists
+    public static DataUploader getMobileClient(Context context) {
+        if (dataUploader == null) {
+            dataUploader = new DataUploader(context.getApplicationContext());
         }
-        return mobileClient;
+        return dataUploader;
     }
 
-    //Constructor for MobileClient
-    private MobileClient(Context context) {
+    //Constructor for DataUploader
+    private DataUploader(Context context) {
         this.context = context;
 
         //Builds the GoogleApiClient for Google Play Service integration

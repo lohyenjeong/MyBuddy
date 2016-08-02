@@ -13,16 +13,14 @@ import com.lohyenjeong.mybuddy.shared.MessagePaths;
  * Class receives messages from the phone
  * Used to start or stop the sensor collection process
  */
-public class MessageService extends WearableListenerService{
-    private static final String TAG = "MyBuddy/MessageService";
+public class MessageReceiver extends WearableListenerService{
+    private static final String TAG = "MyBuddy/MessageReceiver";
 
     private MobileClient mobileClient;
 
     @Override
     public void onCreate(){
         super.onCreate();
-
-        mobileClient =  MobileClient.getMobileClient(this);
     }
 
     //Receive message from phone to control whether to start or stop SensorListener Service
