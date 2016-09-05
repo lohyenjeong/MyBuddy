@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "961586826263",
+    "firebase_url": "https://mybuddy-b6550.firebaseio.com",
+    "project_id": "mybuddy-b6550",
+    "storage_bucket": "mybuddy-b6550.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:961586826263:android:15fd3bb44d2c68fd",
+        "android_client_info": {
+          "package_name": "com.lohyenjeong.mybuddy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "961586826263-2mddms989rsvcn7tfov7sev6pb7nkia2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAISNHhe9IOD_ZL3rl1l792VREePaSimis"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

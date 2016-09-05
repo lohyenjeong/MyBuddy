@@ -3,7 +3,6 @@ package com.lohyenjeong.mybuddy;
 import android.content.Intent;
 import android.util.Log;
 
-import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.lohyenjeong.mybuddy.shared.MessagePaths;
@@ -16,7 +15,6 @@ import com.lohyenjeong.mybuddy.shared.MessagePaths;
 public class MessageReceiver extends WearableListenerService{
     private static final String TAG = "MyBuddy/MessageReceiver";
 
-    private MobileClient mobileClient;
 
     @Override
     public void onCreate(){

@@ -1,0 +1,45 @@
+@relation 'gesture-weka.filters.unsupervised.instance.RemoveMisclassified-Wweka.classifiers.bayes.NaiveBayes -D-C-1-F0-T0.1-I0-weka.filters.unsupervised.instance.RemoveMisclassified-Wweka.classifiers.bayes.NaiveBayes -D-C-1-F0-T0.1-I0'
+
+@attribute meanX numeric
+@attribute meanY numeric
+@attribute meanZ numeric
+@attribute maxX numeric
+@attribute maxY numeric
+@attribute maxZ numeric
+@attribute minX numeric
+@attribute minY numeric
+@attribute minZ numeric
+@attribute meanCrossingX numeric
+@attribute meanCrossingY numeric
+@attribute meanCrossingZ numeric
+@attribute absMeanX numeric
+@attribute absMeanY numeric
+@attribute absMeanZ numeric
+@attribute absDifferenceX numeric
+@attribute absDifferenceY numeric
+@attribute absDifferenceZ numeric
+@attribute stdDeviationX numeric
+@attribute stdDeviationY numeric
+@attribute stdDeviationZ numeric
+@attribute skewnessX numeric
+@attribute skewnessY numeric
+@attribute skewnessZ numeric
+@attribute kurtosisX numeric
+@attribute kurtosisY numeric
+@attribute kurtosisZ numeric
+@attribute rootMeanSquareX numeric
+@attribute rootMeanSquareY numeric
+@attribute rootMeanSquareZ numeric
+@attribute percentile25X numeric
+@attribute percentile25Y numeric
+@attribute percentile25Z numeric
+@attribute percentile50X numeric
+@attribute percentile50Y numeric
+@attribute percentile50Z numeric
+@attribute percentile75X numeric
+@attribute percentile75Y numeric
+@attribute percentile75Z numeric
+@attribute class {gesture-pacing,gesture-rocking,gesture-hairpulling,gesture-scratching,gesture-hitting,gesture-punching}
+
+@data
+-4.45082,0.431175,0.33651,1.278953,8.229171,3.971981,-14.078505,-11.437251,-11.04131,8,12,9,4.578716,3.966689,2.612812,3.595464,5.914157,0,11.185293,25.146221,13.380613,-0.872173,-0.789021,-2.142717,2.105319,0.271649,4.567595,5.567324,5.033104,3.673398,-6.311266,-3.281553,-0.353893,-4.988319,1.027561,1.77964,-2.11842,3.62527,2.162263,?

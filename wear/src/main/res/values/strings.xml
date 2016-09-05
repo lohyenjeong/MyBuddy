@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">MyBuddy</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
+    <string name="app_started">My Buddy</string>
+    <string name="collect_data">Collecting sensor data</string>
 </resources>

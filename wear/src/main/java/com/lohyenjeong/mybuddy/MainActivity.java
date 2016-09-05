@@ -3,10 +3,11 @@ package com.lohyenjeong.mybuddy;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
+import android.util.Log;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-
+    private static final String TAG = "MyBuddy/Main";
     private TextView mTextView;
 
     @Override
@@ -20,5 +21,7 @@ public class MainActivity extends Activity {
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });
+        Log.d(TAG, "Wear Started");
     }
+
 }

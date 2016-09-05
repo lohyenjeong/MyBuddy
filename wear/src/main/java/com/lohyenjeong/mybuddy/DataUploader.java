@@ -13,6 +13,7 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.lohyenjeong.mybuddy.shared.DataMapKeys;
 
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +35,7 @@ public class DataUploader {
 
     //Method calling constructor for DataUploader
     //Checks whether dataUploader already exists
-    public static DataUploader getMobileClient(Context context) {
+    public static DataUploader getDataUploader(Context context) {
         if (dataUploader == null) {
             dataUploader = new DataUploader(context.getApplicationContext());
         }

@@ -15,19 +15,39 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debug {
+                debuggable true
+            }
         }
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE-FIREBASE.txt'
+        exclude 'META-INF/NOTICE'
     }
 }
 
 
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     wearApp project(':wear')
     testCompile 'junit:junit:4.12'
+    compile project(':shared')
+    compile files('libs/wekaSTRIPPED.jar')
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.google.android.gms:play-services:9.2.1'
     compile 'com.android.support:support-v4:24.0.0'
     compile 'com.android.support:design:24.0.0'
-
+    compile 'com.firebase:firebase-client-android:2.3.1'
+    compile 'com.google.firebase:firebase-core:9.2.0'
+    compile 'com.google.firebase:firebase-auth:9.2.0'
+    compile 'com.google.firebase:firebase-database:9.2.0'
+    compile 'io.realm:realm-android:0.80.3'
+    compile 'com.android.support:recyclerview-v7:24.0.0'
+    compile 'com.google.android.gms:play-services-ads:9.2.1'
+    compile 'com.google.android.gms:play-services-auth:9.2.1'
+    compile 'com.google.android.gms:play-services-gcm:9.2.1'
 }
+
+apply plugin: 'com.google.gms.google-services'

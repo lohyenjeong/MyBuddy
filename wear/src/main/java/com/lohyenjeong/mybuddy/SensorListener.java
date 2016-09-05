@@ -16,10 +16,10 @@ import android.util.Log;
  * Created by lohyenjeong on 28/7/16.
  * Class that binds to required sensors
  * Detects new sensor events
- * Controls start and stop of sensor listener
+ * Provides mechanism to control the start and stop of sensor listener
  */
 public class SensorListener extends Service implements SensorEventListener {
-    private static final String TAG = "Buddy/SensorListener";
+    private static final String TAG = "MyBuddy/SensorListener";
     private static final int timeout = 10000;
 
     private SensorManager mSensorManager;
@@ -27,14 +27,15 @@ public class SensorListener extends Service implements SensorEventListener {
     private Sensor mLinearAcceleration;
     private Sensor mGyroscope;
 
-    private MobileClient mobileClient;
+    private DataUploader dataUploader;
 
-    //Creates a mobileClient for Google Play Services integration if not already present
+    //Creates a dataUploader for Google Play Services integration if not already present
     @Override
     public void onCreate(){
         super.onCreate();
+        Log.d(TAG, "SensorListener Started");
 
-        mobileClient = MobileClient.getMobileClient(this);
+        dataUploader = DataUploader.getDataUploader(this);
 
         Notification.Builder builder = new Notification.Builder(this);
         builder.setContentTitle("MyBuddy");
@@ -59,19 +60,20 @@ public class SensorListener extends Service implements SensorEventListener {
     public void startSensorListener(){
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if(mSensorManager != null) {
-            if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-                mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-                Log.d(TAG, "Accelerometer Sensor found");
-            } else {
-                Log.e(TAG, "No Accelerometer Sensor found. Programme cannot proceed");
-            }
             if (mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null) {
                 mLinearAcceleration = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
                 mSensorManager.registerListener(this, mLinearAcceleration, SensorManager.SENSOR_DELAY_NORMAL);
                 Log.d(TAG, "Linear acceleration results found");
             } else {
                 Log.e(TAG, "No Linear accelerator found. Programme cannot proceed");
+            }
+            /*
+            if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+                mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                Log.d(TAG, "Accelerometer Sensor found");
+            } else {
+                Log.e(TAG, "No Accelerometer Sensor found. Programme cannot proceed");
             }
             if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
                 mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -80,7 +82,9 @@ public class SensorListener extends Service implements SensorEventListener {
             } else {
                 Log.e(TAG, "No Gyroscope found. Programme cannot proceed");
             }
+            */
         }
+
 
     }
 
@@ -118,7 +122,7 @@ public class SensorListener extends Service implements SensorEventListener {
     //Get and upload sensor data items when a new event is reported to the android wear network
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        mobileClient.sendSensorData(sensorEvent.sensor.getType(), sensorEvent.timestamp, sensorEvent.values, sensorEvent.accuracy);
+        dataUploader.sendSensorData(sensorEvent.sensor.getType(), sensorEvent.timestamp, sensorEvent.values, sensorEvent.accuracy);
     }
 
     //Required method to allow other activities to bind to this service if wanted

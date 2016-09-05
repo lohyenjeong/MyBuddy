@@ -7,17 +7,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MonitorActivity extends AppCompatActivity {
+import com.lohyenjeong.mybuddy.challengingbehaviour.CBRecognition;
+import com.lohyenjeong.mybuddy.dummy.GestureContent;
+
+
+public class MonitorActivity extends AppCompatActivity implements GestureListFragment.OnListFragmentInteractionListener{
     private static final String TAG = "MyBuddy/Main";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitor);
-        if (savedInstanceState == null) {
-            PersonalGestureFragment personalGestureFragment = PersonalGestureFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().add(R.id.main_content, personalGestureFragment).commit();
-        }
+
+        //TODO: run in new thread
+        CBRecognition cbRecognition = new CBRecognition(this);
+
+
+
+
     }
 
     @Override
@@ -32,11 +40,14 @@ public class MonitorActivity extends AppCompatActivity {
         int id = menuItem.getItemId();
         switch(id){
             case R.id.action_account:
+                startActivity(new Intent(this, AccountActivity.class));
                 return true;
             case R.id.action_pair:
+                startActivity(new Intent(this, PairingActivity.class));
                 return true;
             case R.id.action_about:
                 //TODO: check for ways to recycle aboutactivity if it already exist in backstack
+
                 startActivity(new Intent(this, AboutActivity.class));
                 return true;
             default:
@@ -44,5 +55,19 @@ public class MonitorActivity extends AppCompatActivity {
         }
 
     }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+
+
+    }
+
+
+    @Override
+    public void onListFragmentInteraction(GestureContent.GestureItem item) {
+
+    }
+
 
 }

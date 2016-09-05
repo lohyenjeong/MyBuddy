@@ -15,6 +15,7 @@ import com.lohyenjeong.mybuddy.shared.MessagePaths;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,31 +34,41 @@ public class MessageSender {
     private SensorNames sensorNames;
 
 
-    public static synchronized MessageSender getMobileMessageService(Context context){
-        if(messageSender == null){
+    public static synchronized MessageSender getMessageSender(Context context) {
+        if (messageSender == null) {
             messageSender = new MessageSender(context.getApplicationContext());
         }
+        Log.d(TAG, "got through constructor");
         return messageSender;
     }
 
-    private MessageSender(Context context){
+    private MessageSender(Context context) {
         this.context = context;
         this.sensorNames = new SensorNames();
-        this.googleApiClient = new GoogleApiClient.Builder(context).addApi(Wearable.API).build();
+        this.googleApiClient = new GoogleApiClient.Builder(context)
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult result) {
+                        Log.d(TAG, "Connection failed: " + result);
+                    }
+                }).addApi(Wearable.API).build();
+
+        this.executorService = Executors.newCachedThreadPool();
     }
 
-    private boolean checkConnection(){
-        if(googleApiClient.isConnected()){
+    private boolean checkConnection() {
+        if (googleApiClient.isConnected()) {
             return true;
         }
         ConnectionResult connectionResult = googleApiClient.blockingConnect(TIMEOUT, TimeUnit.MILLISECONDS);
-
+        Log.d(TAG, "Connection failed while checking connection");
         return connectionResult.isSuccess();
 
     }
 
-    public void startSensors(){
-        executorService.submit(new Runnable(){
+    public void startSensors() {
+        Log.d(TAG, "starting sensors");
+        executorService.submit(new Runnable() {
             @Override
             public void run() {
                 controlSensors(MessagePaths.START_SENSORS);
@@ -65,8 +76,8 @@ public class MessageSender {
         });
     }
 
-    public void stopSensors(){
-        executorService.submit(new Runnable(){
+    public void stopSensors() {
+        executorService.submit(new Runnable() {
             @Override
             public void run() {
                 controlSensors(MessagePaths.STOP_SENSORS);
@@ -80,17 +91,16 @@ public class MessageSender {
     }
 
 
-    private void controlSensors(final String path){
-        if(checkConnection()){
+    private void controlSensors(final String path) {
+        if (checkConnection()) {
+            Log.d(TAG, "Checking connections");
             List<Node> nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await().getNodes();
 
             Log.d(TAG, "Sending to nodes: " + nodes.size());
 
             for (Node node : nodes) {
                 Log.i(TAG, "add node " + node.getDisplayName());
-                Wearable.MessageApi.sendMessage(
-                        googleApiClient, node.getId(), path, null
-                ).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
+                Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, null).setResultCallback(new ResultCallback<MessageApi.SendMessageResult>() {
                     @Override
                     public void onResult(MessageApi.SendMessageResult sendMessageResult) {
                         Log.d(TAG, "controlMeasurementInBackground(" + path + "): " + sendMessageResult.getStatus().isSuccess());

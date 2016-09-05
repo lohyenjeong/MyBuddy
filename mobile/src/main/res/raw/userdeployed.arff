@@ -1,0 +1,44 @@
+%User who is trigger by one count of hairpulling and scratching but not pacing and rocking
+
+@RELATION cb
+
+@ATTRIBUTE pacing NUMERIC
+@ATTRIBUTE rocking NUMERIC
+@ATTRIBUTE hairpulling NUMERIC
+@ATTRIBUTE scratching NUMERIC
+@ATTRIBUTE all NUMERIC
+@ATTRIBUTE class 	{Cb-occurs,Cb-null}
+
+@DATA
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null
+0,0,1,0,1,Cb-occurs
+0,0,0,1,1,Cb-occurs
+1,0,0,0,1,Cb-null
+0,1,0,0,1,Cb-null

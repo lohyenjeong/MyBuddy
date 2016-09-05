@@ -1,16 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.lohyenjeong.mybuddy.MainActivity"
-    tools:deviceIds="wear_round">
+    tools:deviceIds="wear_square">
+
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"/>
+
+    <ImageView
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:id="@+id/imageView"
+        android:background="@mipmap/ic_launcher"
+        android:layout_gravity="bottom|center"
+        android:layout_margin="6dp"
+        android:cropToPadding="false" />
 
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/app_name"
+        android:textStyle="bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_round" />
-</RelativeLayout>
+        android:text="@string/app_started"
+        android:layout_gravity="center"
+        android:layout_margin="6dp"/>
+
+    <TextView
+        android:id="@+id/text_collect_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/collect_data"
+        android:layout_gravity="center" />
+
+    <Space
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"/>
+
+</LinearLayout>
