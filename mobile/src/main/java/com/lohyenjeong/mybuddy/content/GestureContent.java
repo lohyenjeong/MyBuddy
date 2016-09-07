@@ -1,8 +1,18 @@
-package com.lohyenjeong.mybuddy.dummy;
+package com.lohyenjeong.mybuddy.content;
 
 /**
  * Created by lohyenjeong on 5/9/16.
  */
+
+import android.util.Log;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +25,11 @@ import java.util.Map;
  * <p>
  * TODO: Replace all uses of this class before publishing your app.
  */
+
+
+
 public class GestureContent {
+    private static String TAG = "GestureData";
 
     /**
      * An array of sample (dummy) items.
@@ -27,10 +41,66 @@ public class GestureContent {
      */
     public static final Map<String, GestureItem> ITEM_MAP = new HashMap<String, GestureItem>();
 
-    private static final int COUNT = 25;
+    private static final int COUNT = 50;
+
+    //Firebase References
+    private static DatabaseReference mDatabase;
 
     static {
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String email = user.getEmail();
+        int index = email.indexOf('@');
+        String username = email.substring(0,index);
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("gestures").child(username);
+
+
+        ChildEventListener childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "Test onChildAdded:" + dataSnapshot.getKey());
+
+                Map <String, Object> dataItem = (Map <String, Object>) dataSnapshot.getValue();
+                String time = (String) dataItem.get("time");
+                String date = (String) dataItem.get("date");
+                Long gestureType = (Long) dataItem.get("type");
+                int type = gestureType.intValue();
+                Log.d(TAG, "test data download " + date + " " + time + " " + type);
+
+                /*
+                GestureItem d1 = new GestureItem("1", date, type, time);
+                ITEMS.add(d1);
+                ITEM_MAP.put(d1.id, d1);
+                */
+
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildChanged:" + dataSnapshot.getKey());
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved:" + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
+                Log.d(TAG, "onChildMoved:" + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "postComments:onCancelled", databaseError.toException());
+            }
+        };
+        mDatabase.addChildEventListener(childEventListener);
+
+
+/*
         GestureItem d1 = new GestureItem("1", "01.09.2016", 1, "23:42:01");
         ITEMS.add(d1);
         ITEM_MAP.put(d1.id, d1);
@@ -66,6 +136,7 @@ public class GestureContent {
         GestureItem d9 = new GestureItem("1", "01.09.2016", 0, "23:44:");
         ITEMS.add(d9);
         ITEM_MAP.put(d9.id, d9);
+        */
     }
 
 

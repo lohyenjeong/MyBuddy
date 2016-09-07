@@ -8,21 +8,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lohyenjeong.mybuddy.AlertFragment.OnListFragmentInteractionListener;
-import com.lohyenjeong.mybuddy.dummy.DummyContent.DummyItem;
+import com.lohyenjeong.mybuddy.content.AlertContent.AlertItem;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link AlertItem} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyAlertRecyclerViewAdapter extends RecyclerView.Adapter<MyAlertRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<AlertItem> mValues;
     private final OnListFragmentInteractionListener mListener;
 
-    public MyAlertRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public MyAlertRecyclerViewAdapter(List<AlertItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -38,15 +38,31 @@ public class MyAlertRecyclerViewAdapter extends RecyclerView.Adapter<MyAlertRecy
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         int type = mValues.get(position).type;
-       if(type == 0){
+        if (type == 0) {
+            holder.mGestureIcon.setImageResource(R.drawable.ic_face_black_24dp);
+            holder.mContentView.setText("Pacing Detected");
+        }
+        else if(type == 1){
+            holder.mGestureIcon.setImageResource(R.drawable.ic_face_black_24dp);
+            holder.mContentView.setText("Chair Rocking Detected");
+        }
+        else if(type == 2){
+            holder.mGestureIcon.setImageResource(R.drawable.ic_face_black_24dp);
+            holder.mContentView.setText("Hair Pulling Detected");
+        }
+        else if(type == 3){
+            holder.mGestureIcon.setImageResource(R.drawable.ic_face_black_24dp);
+            holder.mContentView.setText("Scratching Detected");
+        }
+        else if(type == 4){
             holder.mGestureIcon.setImageResource(R.drawable.ic_error_black_24dp);
             holder.mContentView.setText("Hitting Detected");
         }
-        else if(type == 1){
+        else if(type == 5){
             holder.mGestureIcon.setImageResource(R.drawable.ic_error_black_24dp);
             holder.mContentView.setText("Punching Detected");
         }
-        else if(type == 2){
+        else if(type == 6){
             holder.mGestureIcon.setImageResource(R.drawable.ic_mood_bad_black_24dp);
             holder.mContentView.setText("Challenging Behaviour Predicted!");
         }
@@ -82,7 +98,7 @@ public class MyAlertRecyclerViewAdapter extends RecyclerView.Adapter<MyAlertRecy
         public final TextView mNameView;
         public final ImageView mGestureIcon;
 
-        public DummyItem mItem;
+        public AlertItem mItem;
 
         public ViewHolder(View view) {
             super(view);

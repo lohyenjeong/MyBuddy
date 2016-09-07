@@ -7,7 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.lohyenjeong.mybuddy.challengingbehaviour.CBRecognition;
-import com.lohyenjeong.mybuddy.dummy.DummyContent;
+import com.lohyenjeong.mybuddy.content.AlertContent;
 
 
 public class CaregiverActivity extends AppCompatActivity implements AlertFragment.OnListFragmentInteractionListener{
@@ -62,7 +62,7 @@ public class CaregiverActivity extends AppCompatActivity implements AlertFragmen
 
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+    public void onListFragmentInteraction(AlertContent.AlertItem item) {
 
     }
 

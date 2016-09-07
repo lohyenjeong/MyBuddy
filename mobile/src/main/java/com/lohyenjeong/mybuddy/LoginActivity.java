@@ -21,11 +21,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -39,11 +36,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.lohyenjeong.mybuddy.models.User;
+
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -71,6 +70,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private SharedPreferences prefs;
     private String userEmail;
     private String userPassword;
+    private String username;
 
     //Completed password and email fields
     private String password;
@@ -78,17 +78,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
 
     //Firebase references
+    private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     private boolean signInB;
     boolean taskCompleted;
-    private Firebase ref;
-
-
-    //TODO: remove after connecting to a real authentication system.
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "lohyenjeong@gmail.com:hello", "bar@example.com:world"
-    };
+    private Firebase mRef;
 
 
     @Override
@@ -97,27 +91,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
 
 
-        ref = new Firebase(Constants.FIREBASE_URL);
         //Firebase Setup
         signInB = false;
-        mAuth = FirebaseAuth.getInstance();
         taskCompleted = false;
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    map.put("email", email);
-                    ref.child("users").child(user.getUid()).setValue(map);
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-            }
-        };
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
 
         // Set up the login form.
         inputEmail = (AutoCompleteTextView) findViewById(R.id.input_login_email);
@@ -178,7 +156,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+        if (mAuth.getCurrentUser() != null) {
+            onAuthSuccess(mAuth.getCurrentUser());
+        }
     }
 
 
@@ -228,7 +208,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         inputEmail.setError(null);
         inputPassword.setError(null);
 
-        // Store values at the time of the login attempt.
+        // Store values at the timestamp of the login attempt.
         email = inputEmail.getText().toString();
         password = inputPassword.getText().toString();
 
@@ -332,9 +312,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onStop(){
         super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
         if(progressDialog != null){
             progressDialog.dismiss();
         }
@@ -345,28 +322,37 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Log.d(TAG, "signIn:" + email);
         final String iEmail = email;
 
+
         // [START sign_in_with_email]
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+                        Log.d(TAG, "signIn:onComplete:" + task.isSuccessful());
                         taskCompleted = true;
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.e(TAG, "signInWithEmail", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                        if (task.isSuccessful()) {
+                            onAuthSuccess(task.getResult().getUser());
+                            signInB= true;
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Sign In Failed",
                                     Toast.LENGTH_SHORT).show();
-                        }
-                        else{
-                            signInB = true;
                         }
                     }
                 });
+
     }
 
+    private void onAuthSuccess(FirebaseUser user) {
+        String fEmail = user.getEmail();
+        int index = fEmail.indexOf('@');
+        username = fEmail.substring(0,index);
+        Log.d(TAG, "username is " + username);
+
+        // Go to MainActivity
+        startActivity(new Intent(LoginActivity.this, MonitorActivity.class));
+        finish();
+    }
 
     //Class that represents an asynchronous login/registration task used to authenticate the user
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
@@ -405,15 +391,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     toast.show();
 
 
-
+                    String mode="";
                     //Save the correct password and email to sharedprefences
                     if (prefs != null) {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString(getString(R.string.user_email), mEmail);
                         editor.putString(getString(R.string.user_password), mPassword);
+                        editor.putString(getString(R.string.user_username), username);
+                        mode = prefs.getString("Mode", "");
                         editor.commit();
                     }
-                    startActivity(new Intent(getApplicationContext(), CaregiverActivity.class));
+                    if(mode.equals("Personal Use")) {
+                        startActivity(new Intent(LoginActivity.this, MonitorActivity.class));
+                    }else{
+                        startActivity(new Intent(LoginActivity.this, CaregiverActivity.class));
+                    }
                 }
                 finish();
             } else {
@@ -431,5 +423,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         }
     }
+
+    public String getUid() {
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+    }
+
 }
 

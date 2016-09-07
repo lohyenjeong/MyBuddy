@@ -36,6 +36,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.lohyenjeong.mybuddy.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,10 +65,11 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
     private String mode;
     private String email;
     private String password;
+    private String username;
 
-    //Firebase authentication
+    //Firebase authentication and database
+    private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
     boolean registered;
     boolean taskCompleted;
 
@@ -75,23 +79,11 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
         setContentView(R.layout.activity_sign_up);
 
 
-        //Set up Firebase authentication database
+        //Set up Firebase authentication and database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         registered = false;
         taskCompleted = false;
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
-                }
-            }
-        };
 
         // Set up the sign up form.
         inputEmail = (AutoCompleteTextView) findViewById(R.id.input_reg_email);
@@ -154,7 +146,10 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+        //Brings you to the main page if you are already signed in
+        if (mAuth.getCurrentUser() != null) {
+            onAuthSuccess(mAuth.getCurrentUser());
+        }
     }
 
 
@@ -162,33 +157,51 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onStop() {
         super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
     }
 
     private void createAccount(String email, String password) {
         Log.d(TAG, "createAccount:" + email);
 
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                Log.d(TAG, "createUserWithEmail:onComplete:" + task.isSuccessful());
-                taskCompleted = true;
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "createUser:onComplete:" + task.isSuccessful());
+                        taskCompleted = true;
 
-                // If sign in fails, display a message to the user. If sign in succeeds
-                // the auth state listener will be notified and logic to handle the
-                // signed in user can be handled in the listener.
-                if (!task.isSuccessful()) {
-                    Toast.makeText(SignUpActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
-                } else {
-                    registered = true;
-                    Log.e(TAG, "not successful");
-                }
-            }
-        });
+                        if (task.isSuccessful()) {
+                            onAuthSuccess(task.getResult().getUser());
+                            registered = true;
+                        } else {
+                            Toast.makeText(SignUpActivity.this, "Sign Up Failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
+    private void onAuthSuccess(FirebaseUser user) {
+        int index = email.indexOf('@');
+        username = email.substring(0,index);
+
+        // Write new user
+        writeNewUser(user.getUid(), username, user.getEmail());
+
+        // Go to MainActivity
+        if(mode.equals("Personal Use")) {
+            startActivity(new Intent(SignUpActivity.this, MonitorActivity.class));
+        }else{
+            startActivity(new Intent(SignUpActivity.this, CaregiverActivity.class));
+        }
+        finish();
+    }
+
+    // [START basic_write]
+    private void writeNewUser(String userId, String name, String email) {
+        User user = new User(name, email);
+
+        mDatabase.child("users").child(userId).setValue(user);
+    }
 
     private void populateAutoComplete() {
         if (!mayRequestContacts()) {
@@ -244,7 +257,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
         inputEmail.setError(null);
         inputPassword.setError(null);
 
-        // Store values at the time of the login attempt.
+        // Store values at the timestamp of the login attempt.
         email = inputEmail.getText().toString();
         password = inputPassword.getText().toString();
 
@@ -395,6 +408,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
                     editor.putString(getString(R.string.user_email), mEmail);
                     editor.putString(getString(R.string.user_password), mPassword);
                     editor.putString(getString(R.string.user_mode), mMode);
+                    editor.putString(getString(R.string.user_username), username);
                     editor.commit();
 
 

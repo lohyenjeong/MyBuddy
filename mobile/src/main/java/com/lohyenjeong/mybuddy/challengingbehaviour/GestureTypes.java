@@ -18,7 +18,7 @@ public class GestureTypes {
 
     public GestureTypes(){
         cbTypes = new SparseArray<String>();
-        cbTypes.append(0, "Null Gesture");
+        cbTypes.append(0, "Null Occurrence");
         cbTypes.append(1, "Rapid pacing");
         cbTypes.append(2, "Rocking chair");
         cbTypes.append(3, "Pinching hand");

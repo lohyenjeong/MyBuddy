@@ -62,7 +62,7 @@ public class CBData {
         }
         //If gesture is a random gesture
         else if(gestureType == -1){
-            Log.d(TAG, "recording null Gesture");
+            Log.d(TAG, "recording null Occurrence");
             recordNullGesture();
         }
         else{

@@ -1,12 +1,18 @@
 package com.lohyenjeong.mybuddy.challengingbehaviour;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.lohyenjeong.mybuddy.R;
 
 import com.lohyenjeong.mybuddy.gesture.GestureNames;
+import com.lohyenjeong.mybuddy.models.Occurrence;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -14,7 +20,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 
 import weka.classifiers.trees.RandomForest;
@@ -52,8 +62,19 @@ public class CBRecognition {
     private static File file;
 
 
+    private DatabaseReference mDatabase;
+    private String username;
+
+    private SharedPreferences prefs;
+
     public CBRecognition(Context context){
         this.context = context;
+
+        prefs = context.getSharedPreferences(context.getString(R.string.user_data), 0);
+        username = prefs.getString(context.getString(R.string.user_username), "");
+        Log.d(TAG, "username is " + username);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("gestures").child(username);
 
         if(file == null || trainDataset == null) {
             file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), FILENAME);
@@ -195,6 +216,21 @@ public class CBRecognition {
         String r = "";
         if(result == 0.0){
             r = "Cb-occurs";
+            //Add instance to database
+            long timestamp = Calendar.getInstance().getTimeInMillis();
+            SimpleDateFormat formatterDate = new SimpleDateFormat("dd-MM-yyyy");
+            SimpleDateFormat formatterTime = new SimpleDateFormat("HH.mm.ss");
+            String date = formatterDate.format(timestamp);
+            String time = formatterTime.format(timestamp);
+
+            String key = mDatabase.push().getKey();
+            Occurrence occur = new Occurrence(date, time, 6, username);
+            Map<String, Object> occurValues = occur.toMap();
+
+            Map<String, Object> childupdates = new HashMap<>();
+            childupdates.put(key, occurValues);
+
+            mDatabase.updateChildren(childupdates);
         }else if(result == 1.0){
             r = "Cb-null";
         }else{

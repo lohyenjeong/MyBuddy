@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lohyenjeong.mybuddy.GestureListFragment.OnListFragmentInteractionListener;
-import com.lohyenjeong.mybuddy.dummy.GestureContent.GestureItem;
+import com.lohyenjeong.mybuddy.content.GestureContent.GestureItem;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ import java.util.List;
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyGestureRecyclerViewAdapter extends RecyclerView.Adapter<MyGestureRecyclerViewAdapter.ViewHolder> {
+    private final static String TAG = "MyBuddy/GRecycler";
 
     private final List<GestureItem> mValues;
     private final OnListFragmentInteractionListener mListener;
@@ -33,6 +34,9 @@ public class MyGestureRecyclerViewAdapter extends RecyclerView.Adapter<MyGesture
                 .inflate(R.layout.fragment_gesture, parent, false);
         return new ViewHolder(view);
     }
+
+
+
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {

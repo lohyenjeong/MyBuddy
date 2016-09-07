@@ -22,6 +22,9 @@ public class MainActivity extends Activity {
             }
         });
         Log.d(TAG, "Wear Started");
+
+        Log.d(TAG, "Wear Started");
+
     }
 
 }

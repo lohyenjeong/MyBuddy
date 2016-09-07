@@ -1,19 +1,31 @@
 package com.lohyenjeong.mybuddy.gesture;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.gesture.Gesture;
 import android.util.Log;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.lohyenjeong.mybuddy.R;
 import com.lohyenjeong.mybuddy.challengingbehaviour.CBData;
 import com.lohyenjeong.mybuddy.data.SensorDataPoint;
+import com.lohyenjeong.mybuddy.models.Occurrence;
 
 import org.w3c.dom.Attr;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import weka.classifiers.bayes.BayesNet;
@@ -79,7 +91,21 @@ public class GestureRecognition {
 
     private static CBData cbData;
 
+    private DatabaseReference mDatabase;
+    private String username;
+
+    private SharedPreferences prefs;
+
     public GestureRecognition(Context context){
+
+
+        prefs = context.getSharedPreferences(context.getString(R.string.user_data), 0);
+        username = prefs.getString(context.getString(R.string.user_username), "");
+        Log.d(TAG, "username is " + username);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("gestures").child(username);
+
         this.context = context;
 
         if(classList == null){
@@ -195,7 +221,7 @@ public class GestureRecognition {
         newInstances.setClassIndex(NOFEATURES);
         newInstances.add(new DenseInstance(NOFEATURES+1));
 
-        Log.d(TAG, "created denseInstance");
+        Log.d(TAG, "created denseInstance for feature extraction");
 
         newInstances.get(0).setValue(maxX, features[FeatureExtraction.FMAXX]);
         newInstances.get(0).setValue(maxY, features[FeatureExtraction.FMAXY]);
@@ -289,10 +315,30 @@ public class GestureRecognition {
             Log.d(TAG, "Gestures count " + Arrays.toString(gestureCount));
 
             int instance = -1;
-            for(int i = 0; i < NOGESTURES; i++){
+            long timestamp = Calendar.getInstance().getTimeInMillis();
+            SimpleDateFormat formatterDate = new SimpleDateFormat("dd-MM-yyyy");
+                SimpleDateFormat formatterTime = new SimpleDateFormat("HH.mm.ss");
+                String date = formatterDate.format(timestamp);
+                String time = formatterTime.format(timestamp);
+                Log.d(TAG, "Test " + date + " " + time);
+
+                for(int i = 0; i < NOGESTURES; i++){
+                    //An occurrence of behaviour has been detected
                 if(gestureCount[i] >= WINDOWTRESHOLD && i != -1 && i != 7){
                     instance = i;
-                    Log.d(TAG, "Test Gesture instance " + GestureNames.getName(i));
+                    //Add instance to firebase
+                    String key = mDatabase.push().getKey();
+
+                    Occurrence occur = new Occurrence(date, time, instance, username);
+                    Map<String, Object> occurValues = occur.toMap();
+
+                    Map<String, Object> childupdates = new HashMap<>();
+                    childupdates.put(key, occurValues);
+
+                    mDatabase.updateChildren(childupdates);
+
+
+                    Log.d(TAG, "Test Occurrence instance " + GestureNames.getName(i));
                 }
             }
             if(instance == -1){

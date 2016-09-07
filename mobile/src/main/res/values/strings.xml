@@ -7,6 +7,7 @@
     <string name="user_email">UserEmail</string>
     <string name="user_password">Password</string>
     <string name="user_mode">Mode</string>
+    <string name="user_username">Username</string>
 
     <!-- All menus -->
     <string name="action_account">Account</string>
@@ -14,6 +15,7 @@
     <string name="action_caregiver">Caregiver Mode</string>
     <string name="action_personal">Personal Mode</string>
     <string name="action_about">About</string>
+    <string name="action_sign_out">Sign out</string>
 
     <!-- GestureListFragment -->
     <string name="button_start">Start</string>
@@ -50,7 +52,7 @@
 
 
     <!--Pairing-->
-    <string name="prompt_pairing">Email of person you want to pair with</string>
+    <string name="prompt_pairing">Username of person you want to pair with</string>
     <string name="action_save_pairing">Save Pairing</string>
     <string name="text_current_pairing">Current Pairings</string>
     <string-array name="dummy_pairings">

@@ -17,5 +17,9 @@
         android:orderInCategory="100"
         app:showAsAction="never" />
 
+    <item android:id="@+id/action_sign_out"
+        android:title="@string/action_sign_out"
+        android:orderInCategory="150"
+        app:showAsAction="never" />
 
 </menu>
