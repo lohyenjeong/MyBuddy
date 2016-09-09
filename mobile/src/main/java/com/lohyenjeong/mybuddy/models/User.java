@@ -27,4 +27,7 @@ public class User {
         this.mode = mode;
     }
 
+    public static int getMode(User user){
+        return user.mode;
+    }
 }

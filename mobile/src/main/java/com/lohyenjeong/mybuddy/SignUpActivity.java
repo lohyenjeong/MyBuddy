@@ -45,7 +45,12 @@ import java.util.List;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
-//TODO: extract the firebase activities into seperate class. Only if free
+/*
+Class used for registration
+Connected to Google Firebase for authentication purpose as well as database
+Saves the user's username, email and mode as part of the datbase
+*/
+
 public class SignUpActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     final static String TAG = "MyBuddy/SignUpActivity";
 
@@ -62,7 +67,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
     private Spinner spinnerMode;
 
     //User Data
-    private String mode;
+    private int mode;
     private String email;
     private String password;
     private String username;
@@ -78,7 +83,6 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-
         //Set up Firebase authentication and database
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
@@ -92,12 +96,21 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
         Button btnSignUp = (Button) findViewById(R.id.btn_reg_sign_up);
         TextView mSignInButton = (TextView) findViewById(R.id.btn_reg_login);
 
-        //TODO: create own text above spinner as prompt
+        //Listener for changes in the mode spinner (caregiver or personal use)
         Log.e(TAG, spinnerMode.getPrompt().toString());
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mode = spinnerMode.getSelectedItem().toString();
+                String modeS = spinnerMode.getSelectedItem().toString();
+                if(modeS.equals("Personal User")){
+                    mode = 0;
+                }
+                else if(modeS.equals("Caregiver")){
+                    mode = 1;
+                }
+                else{
+                    mode = 0;
+                }
             }
 
             @Override
@@ -106,7 +119,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
 
-        //Get info passed in from last activity
+        //Get info passed in from sign in activity if they were already entered
         Bundle bundle = getIntent().getExtras();
         email = bundle.getString(getString(R.string.user_email));
         password = bundle.getString(getString(R.string.user_password));
@@ -122,7 +135,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
             btnSignUp.requestFocus();
         }
 
-
+        //Listener for sign up button
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,7 +143,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
 
-
+        //Listener for button to switch over to sign in page
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -159,6 +172,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
         super.onStop();
     }
 
+    //Creating authentication account on firebase
     private void createAccount(String email, String password) {
         Log.d(TAG, "createAccount:" + email);
 
@@ -184,21 +198,15 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
         int index = email.indexOf('@');
         username = email.substring(0,index);
 
-        // Write new user
-        writeNewUser(user.getUid(), username, user.getEmail());
+        // Write new user into database
+        writeNewUser(user.getUid(), username, user.getEmail(), mode);
 
-        // Go to MainActivity
-        if(mode.equals("Personal Use")) {
-            startActivity(new Intent(SignUpActivity.this, MonitorActivity.class));
-        }else{
-            startActivity(new Intent(SignUpActivity.this, CaregiverActivity.class));
-        }
         finish();
     }
 
-    // [START basic_write]
-    private void writeNewUser(String userId, String name, String email) {
-        User user = new User(name, email);
+    //Writing the user details into the database
+    private void writeNewUser(String userId, String name, String email, int mode) {
+        User user = new User(name, email, mode);
 
         mDatabase.child("users").child(userId).setValue(user);
     }
@@ -372,9 +380,9 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
 
         private final String mEmail;
         private final String mPassword;
-        private final String mMode;
+        private final int mMode;
 
-        UserRegistrationTask(String email, String password, String mode) {
+        UserRegistrationTask(String email, String password, int mode) {
             mEmail = email;
             mPassword = password;
             mMode = mode;
@@ -407,7 +415,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString(getString(R.string.user_email), mEmail);
                     editor.putString(getString(R.string.user_password), mPassword);
-                    editor.putString(getString(R.string.user_mode), mMode);
+                    editor.putInt(getString(R.string.user_mode), mMode);
                     editor.putString(getString(R.string.user_username), username);
                     editor.commit();
 
@@ -418,8 +426,16 @@ public class SignUpActivity extends AppCompatActivity implements LoaderManager.L
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
 
+                    if(mode == User.MODE_PERSONAL_USE) {
+                        startActivity(new Intent(SignUpActivity.this, MonitorActivity.class));
+                    }
+                    else if(mode == User.MODE_CAREGIVER){
+                        startActivity(new Intent(SignUpActivity.this, CaregiverActivity.class));
+                    }
+                    else{
+                        startActivity(new Intent(SignUpActivity.this, MonitorActivity.class));
+                    }
 
-                    startActivity(new Intent(getApplicationContext(), CaregiverActivity.class));
                 }
                 finish();
             } else {

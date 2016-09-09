@@ -61,6 +61,8 @@ public class MonitorActivity extends AppCompatActivity implements GestureListFra
 
             case R.id.action_sign_out:
                 FirebaseAuth.getInstance().signOut();
+
+
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 return true;

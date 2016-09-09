@@ -1,7 +1,6 @@
 package com.lohyenjeong.mybuddy;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -30,16 +29,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.lohyenjeong.mybuddy.models.User;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,20 +76,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private String password;
     private String email;
 
-
     //Firebase references
     private DatabaseReference mDatabase;
     private FirebaseAuth mAuth;
     private boolean signInB;
     boolean taskCompleted;
-    private Firebase mRef;
+    private String uid;
+    private int mode;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
 
         //Firebase Setup
         signInB = false;
@@ -102,7 +101,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         inputPassword = (EditText) findViewById(R.id.input_login_password);
         TextView mSignUpButton = (TextView) findViewById(R.id.btn_login_sign_up);
         Button btnSignIn = (Button) findViewById(R.id.btn_login_sign_in);
-
 
         btnSignIn.setOnClickListener(new OnClickListener() {
             @Override
@@ -117,17 +115,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         prefs = getSharedPreferences(getString(R.string.user_data), 0);
         userEmail = prefs.getString(getString(R.string.user_email), "");
         userPassword = prefs.getString(getString(R.string.user_password), "");
-        if(!userPassword.equals("") && !userEmail.equals("")){
+        if (!userPassword.equals("") && !userEmail.equals("")) {
             inputEmail.setText(userEmail);
             inputPassword.setText(userPassword);
-        }
-        else {
+        } else {
             populateAutoComplete();
         }
 
         //TODO: start populateAutoComplete only when the edittext field for the email address is in focus
         btnSignIn.requestFocus();
 
+        //If changing over to sign up page, then carry information over to the sign up page
         mSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -310,9 +308,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
-        if(progressDialog != null){
+        if (progressDialog != null) {
             progressDialog.dismiss();
         }
     }
@@ -333,7 +331,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                         if (task.isSuccessful()) {
                             onAuthSuccess(task.getResult().getUser());
-                            signInB= true;
+                            signInB = true;
                         } else {
                             Toast.makeText(LoginActivity.this, "Sign In Failed",
                                     Toast.LENGTH_SHORT).show();
@@ -346,11 +344,44 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void onAuthSuccess(FirebaseUser user) {
         String fEmail = user.getEmail();
         int index = fEmail.indexOf('@');
-        username = fEmail.substring(0,index);
+        username = fEmail.substring(0, index);
         Log.d(TAG, "username is " + username);
 
+
+        uid = getUid();
+
+        mDatabase.child("users").child(uid).addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        User user = dataSnapshot.getValue(User.class);
+                        mode = User.getMode(user);
+                        Log.d(TAG, "user mode is " + mode);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.w(TAG, "getUser:onCancelled", databaseError.toException());
+                    }
+                }
+        );
+
+
+
         // Go to MainActivity
-        startActivity(new Intent(LoginActivity.this, MonitorActivity.class));
+        if (mode == User.MODE_PERSONAL_USE) {
+            Log.d(TAG, "in here" + mode);
+            startActivity(new Intent(LoginActivity.this, MonitorActivity.class));
+        }
+        else if (mode == User.MODE_CAREGIVER) {
+            Log.d(TAG, "in here 2");
+            startActivity(new Intent(LoginActivity.this, CaregiverActivity.class));
+        }
+        else {
+            Log.d(TAG, "in here 3");
+            startActivity(new Intent(LoginActivity.this, MonitorActivity.class));
+        }
+
         finish();
     }
 
@@ -369,11 +400,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             signIn(mEmail, mPassword);
-            try{
+            try {
                 while (!taskCompleted) {
                     Thread.sleep(10);
                 }
-            }catch(InterruptedException e){
+            } catch (InterruptedException e) {
                 return false;
             }
             return true;
@@ -383,7 +414,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             if (success) {
-                if(signInB == true) {
+                if (signInB == true) {
                     Context context = getApplicationContext();
                     CharSequence text = "Sign in successful!";
                     int duration = Toast.LENGTH_SHORT;
@@ -391,25 +422,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     toast.show();
 
 
-                    String mode="";
-                    //Save the correct password and email to sharedprefences
+
+                    Log.d(TAG, "in onPostExecute");
+                    //Save the correct password and email and mode to sharedprefences
                     if (prefs != null) {
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putString(getString(R.string.user_email), mEmail);
                         editor.putString(getString(R.string.user_password), mPassword);
                         editor.putString(getString(R.string.user_username), username);
-                        mode = prefs.getString("Mode", "");
+                        editor.putInt(getString(R.string.user_mode), mode);
                         editor.commit();
                     }
-                    if(mode.equals("Personal Use")) {
-                        startActivity(new Intent(LoginActivity.this, MonitorActivity.class));
-                    }else{
-                        startActivity(new Intent(LoginActivity.this, CaregiverActivity.class));
-                    }
+
+
                 }
                 finish();
             } else {
-                if(progressDialog != null){
+                if (progressDialog != null) {
                     progressDialog.dismiss();
                 }
                 inputPassword.setError(getString(R.string.error_incorrect_password));
